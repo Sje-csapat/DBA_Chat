@@ -47,7 +47,7 @@ namespace masodik
                 return View();
             }
         }
-        public ActionResult Proba(string username,string password)
+        public ActionResult Log(string username,string password)
         {
             Home passdata = new Home
             {
@@ -59,11 +59,7 @@ namespace masodik
                 string connectionstring = "Data Source=C:/Users/salma/Desktop/Adatbazis_alkalmazasok/marak/DBA/masodik/database.db;Version=3;";
                 using SQLiteConnection dbconn = new SQLiteConnection(connectionstring);
                 dbconn.Open();
-                //using var cmd = new SQLiteCommand(dbconn);
-                //cmd.CommandText = "INSERT INTO users(username,password,created_at) VALUES('username','password','5555')";
-                //cmd.ExecuteNonQuery();
-                //dbconn.Close();
-                //
+                
 
 
                 SQLiteCommand cmd = new SQLiteCommand("insert into users (username, password, created_at) values( @productId,@email,@ido)", dbconn);
@@ -80,7 +76,39 @@ namespace masodik
 
             return View("Proba");
         }
-        
-        
+        public ActionResult Reg(string username, string password, string password2)
+        {
+            Register passdata = new Register
+            {
+                username = username,
+                password = password,
+                password2 = password2
+            };
+            
+
+            int ido = 5555;
+            string connectionstring = "Data Source=C:/Users/salma/Desktop/Adatbazis_alkalmazasok/marak/DBA/masodik/database.db;Version=3;";
+            using SQLiteConnection dbconn = new SQLiteConnection(connectionstring);
+            dbconn.Open();
+
+
+
+            SQLiteCommand cmd = new SQLiteCommand("insert into users (username, password, created_at) values( @productId,@email,@ido)", dbconn);
+            cmd.Parameters.Add(new SQLiteParameter("@productId", username));
+            cmd.Parameters.Add(new SQLiteParameter("@email", password));
+            cmd.Parameters.Add(new SQLiteParameter("@ido", ido));
+
+            cmd.ExecuteNonQuery();
+            dbconn.Close();
+
+
+
+            ViewBag.Message = passdata;
+
+            return View("Proba");
+        }
+
+
+
     }
 }
