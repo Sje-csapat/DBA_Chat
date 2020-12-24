@@ -1,0 +1,19 @@
+1. SQL tables:
+
+users (user_id, username, password, created_at) -- done
+logins (id, status [1|0], user_id, created_at)
+messenges (id, user_id, message, created_at)
+
+2. Register...
+INSERT INTO users ...
+
+3. Login 
+SELECT * FROM `users` 
+session_start()
+
+4. Home screen
+Login (or Register redirect) or Chat
+
+5. Private chat simulation (ONLINE & OFFLINE)
+
+6. Bootstrap CSS
