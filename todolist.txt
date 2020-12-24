@@ -5,7 +5,7 @@ logins (id, status [1|0], user_id, created_at)
 messenges (id, sender, receiver, message, created_at)
 
 2. Register...
-INSERT INTO users ...
+INSERT INTO users ...  --done
 
 3. Login 
 SELECT * FROM `users` 
