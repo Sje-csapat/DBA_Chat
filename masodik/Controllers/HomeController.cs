@@ -4,11 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using masodik.Models;
+using System.Data.SQLite;
 
 namespace masodik
 {
     public class HomeController : Controller
     {
+        
         // GET: HomeController
         public ActionResult Index()
         {
@@ -44,5 +47,40 @@ namespace masodik
                 return View();
             }
         }
+        public ActionResult Proba(string username,string password)
+        {
+            Home passdata = new Home
+            {
+                username = username,
+                password = password
+            };
+           
+                int ido = 5555;
+                string connectionstring = "Data Source=C:/Users/salma/Desktop/Adatbazis_alkalmazasok/marak/DBA/masodik/database.db;Version=3;";
+                using SQLiteConnection dbconn = new SQLiteConnection(connectionstring);
+                dbconn.Open();
+                //using var cmd = new SQLiteCommand(dbconn);
+                //cmd.CommandText = "INSERT INTO users(username,password,created_at) VALUES('username','password','5555')";
+                //cmd.ExecuteNonQuery();
+                //dbconn.Close();
+                //
+
+
+                SQLiteCommand cmd = new SQLiteCommand("insert into users (username, password, created_at) values( @productId,@email,@ido)", dbconn);
+                cmd.Parameters.Add(new SQLiteParameter("@productId", username));
+                cmd.Parameters.Add(new SQLiteParameter("@email", password));
+                cmd.Parameters.Add(new SQLiteParameter("@ido", ido));
+
+                cmd.ExecuteNonQuery();
+                dbconn.Close();
+
+                
+                        
+            ViewBag.Message = passdata;
+
+            return View("Proba");
+        }
+        
+        
     }
 }

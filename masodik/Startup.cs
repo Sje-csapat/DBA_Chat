@@ -28,6 +28,7 @@ namespace masodik
         {
             string dabasestr = contentRoot + "/database.db";
             System.Diagnostics.Debug.WriteLine(dabasestr);
+            
             if (File.Exists(dabasestr))
             {
                 string connectionstring = "Data Source=" + dabasestr + ";Version=3;";

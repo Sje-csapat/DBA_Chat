@@ -1,23 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Users\\Geza_Molnar\\Downloads\\masodik\\masodik\\masodik.csproj": {}
+    "C:\\Users\\salma\\Desktop\\Adatbazis_alkalmazasok\\marak\\DBA\\masodik\\masodik.csproj": {}
   },
   "projects": {
-    "D:\\Users\\Geza_Molnar\\Downloads\\masodik\\masodik\\masodik.csproj": {
+    "C:\\Users\\salma\\Desktop\\Adatbazis_alkalmazasok\\marak\\DBA\\masodik\\masodik.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Users\\Geza_Molnar\\Downloads\\masodik\\masodik\\masodik.csproj",
+        "projectUniqueName": "C:\\Users\\salma\\Desktop\\Adatbazis_alkalmazasok\\marak\\DBA\\masodik\\masodik.csproj",
         "projectName": "masodik",
-        "projectPath": "D:\\Users\\Geza_Molnar\\Downloads\\masodik\\masodik\\masodik.csproj",
-        "packagesPath": "C:\\Users\\Geza_Molnar\\.nuget\\packages\\",
-        "outputPath": "D:\\Users\\Geza_Molnar\\Downloads\\masodik\\masodik\\obj\\",
+        "projectPath": "C:\\Users\\salma\\Desktop\\Adatbazis_alkalmazasok\\marak\\DBA\\masodik\\masodik.csproj",
+        "packagesPath": "C:\\Users\\salma\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\salma\\Desktop\\Adatbazis_alkalmazasok\\marak\\DBA\\masodik\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Geza_Molnar\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\salma\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -29,7 +26,6 @@
         },
         "frameworks": {
           "netcoreapp3.1": {
-            "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
           }
         },
@@ -41,7 +37,6 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
-          "targetAlias": "netcoreapp3.1",
           "dependencies": {
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
@@ -70,7 +65,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
         }
       }
     }
