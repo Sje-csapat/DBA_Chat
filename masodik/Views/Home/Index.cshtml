@@ -1,19 +1,28 @@
 ﻿@{
     ViewData["Title"] = "Index";
 }
+<center><h1 style="color:white">Kellemes ünnepeket</h1></center>
 
-<h2 style="color:white">Index</h2>
 
 <p style="color:white">Hello from our View Template!</p>
+
+<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+<canvas id="snow"></canvas>
+<div class="center">
+    <div class="text-center">
+        <h1>8 bit snow</h1>
+    </div>
+</div>
 
 <div class='frame'>
 
     <canvas id='tree'></canvas>
 </div>
+
 <style>
     body {
         background-color: black;
-        
+
     }
 
     .frame {
@@ -25,6 +34,7 @@
         color: green;
         text-align: center;
     }
+
         .frame canvas {
             display: block;
             padding: 60px 0px 0px 0px;
@@ -59,7 +69,7 @@
                 speed: 1,
                 radius: 1.5
             }, {
-                color: 'blue',
+                color: 'red',
                 nodes: 80,
                 speed: -3,
                 radius: 6

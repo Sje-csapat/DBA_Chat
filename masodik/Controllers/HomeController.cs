@@ -59,16 +59,21 @@ namespace masodik
                 string connectionstring = "Data Source=C:/Users/salma/Desktop/Adatbazis_alkalmazasok/marak/DBA/masodik/database.db;Version=3;";
                 using SQLiteConnection dbconn = new SQLiteConnection(connectionstring);
                 dbconn.Open();
+
+                string stm = "SELECT * FROM users";
+                using var cmd = new SQLiteCommand(stm, dbconn);
+                using SQLiteDataReader rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                if(rdr.GetString(1)==username && rdr.GetString(2)== password){
+                    System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}"+"found user");
+                    return View("Proba");
+                    break;
+            }
                 
-
-
-                SQLiteCommand cmd = new SQLiteCommand("insert into users (username, password, created_at) values( @productId,@email,@ido)", dbconn);
-                cmd.Parameters.Add(new SQLiteParameter("@productId", username));
-                cmd.Parameters.Add(new SQLiteParameter("@email", password));
-                cmd.Parameters.Add(new SQLiteParameter("@ido", ido));
-
-                cmd.ExecuteNonQuery();
-                dbconn.Close();
+                //Console.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
+            }
+            dbconn.Close();
 
                 
                         
@@ -84,7 +89,7 @@ namespace masodik
                 password = password,
                 password2 = password2
             };
-            
+            if (password != password2) return View("Register");
 
             int ido = 5555;
             string connectionstring = "Data Source=C:/Users/salma/Desktop/Adatbazis_alkalmazasok/marak/DBA/masodik/database.db;Version=3;";
