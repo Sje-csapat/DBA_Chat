@@ -11,11 +11,21 @@ namespace masodik
 {
     public class HomeController : Controller
     {
-        
+
         // GET: HomeController
+        [Route("")]
         public ActionResult Index()
         {
-            return View();
+            System.Diagnostics.Debug.WriteLine(!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")));
+            //return View("Session");
+            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")))
+            {
+                //redirect or view
+                return View("Session");
+            }
+            else {
+                return RedirectToAction(nameof(Login));
+            }
         }
 
         [Route("login")]
@@ -63,18 +73,23 @@ namespace masodik
             cmd.Parameters.AddWithValue("@username", username);
             cmd.Prepare();
             SQLiteDataReader rdr = cmd.ExecuteReader();
+
+            int isLoggedIn = 0;
             while (rdr.Read())
             {
                 //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
                 string db_password = rdr.GetString(2);
                 if (db_password == password) {
                     ViewBag.Message = passdata;
-                    return View("Proba");
+                    HttpContext.Session.SetString("is_logged_in", "1");
+                    HttpContext.Session.SetString("user_id", rdr.GetInt32(0).ToString());
+                    HttpContext.Session.SetString("user_username", rdr.GetString(1).ToString());
+                    isLoggedIn = 1;
                 } else
                 {
                     //password mismatch
                     ViewBag.Message = passdata;
-                    return View("Proba");
+                    isLoggedIn = 0;
                 }
             }
             dbconn.Close();

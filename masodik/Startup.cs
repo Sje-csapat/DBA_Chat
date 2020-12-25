@@ -34,7 +34,7 @@ namespace masodik
 
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.IdleTimeout = TimeSpan.FromSeconds(600);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
