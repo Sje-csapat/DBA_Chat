@@ -21,25 +21,7 @@ namespace masodik
         {
             Configuration = configuration;
             contentRoot = env.ContentRootPath;
-            TestDBConnection();
-        }
-
-        public void TestDBConnection()
-        {
-            string dabasestr = contentRoot + "/database.db";
-            System.Diagnostics.Debug.WriteLine(dabasestr);
-            
-            if (File.Exists(dabasestr))
-            {
-                string connectionstring = "Data Source=" + dabasestr + ";Version=3;";
-                using SQLiteConnection dbconn = new SQLiteConnection(connectionstring);
-                System.Diagnostics.Debug.WriteLine("Works fine");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("Database not found, shutting down!");
-                System.Environment.Exit(1);
-            }
+            Globals.TestDBConnection(contentRoot);
         }
 
         public IConfiguration Configuration { get; }

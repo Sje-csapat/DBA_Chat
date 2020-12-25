@@ -39,7 +39,6 @@ namespace masodik
         {
             try
             {
-
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -47,38 +46,39 @@ namespace masodik
                 return View();
             }
         }
-        public ActionResult Log(string username,string password)
+        public ActionResult Log(string username, string password)
         {
             Home passdata = new Home
             {
                 username = username,
                 password = password
             };
-           
-                int ido = 5555;
-                string connectionstring = "Data Source=C:/Users/salma/Desktop/Adatbazis_alkalmazasok/marak/DBA/masodik/database.db;Version=3;";
-                using SQLiteConnection dbconn = new SQLiteConnection(connectionstring);
-                dbconn.Open();
+            
+            SQLiteConnection dbconn = Globals.Dbconn;
+            dbconn.Open();
+            System.Diagnostics.Debug.WriteLine(username);
 
-                string stm = "SELECT * FROM users";
-                using var cmd = new SQLiteCommand(stm, dbconn);
-                using SQLiteDataReader rdr = cmd.ExecuteReader();
+            using var cmd = new SQLiteCommand(dbconn);
+            cmd.CommandText = "SELECT * FROM users WHERE `username` = @username";
+            cmd.Parameters.AddWithValue("@username", username);
+            cmd.Prepare();
+            SQLiteDataReader rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
-                if(rdr.GetString(1)==username && rdr.GetString(2)== password){
-                    System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}"+"found user");
+                //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
+                string db_password = rdr.GetString(2);
+                if (db_password == password) {
+                    ViewBag.Message = passdata;
                     return View("Proba");
-                    break;
-            }
-                
-                //Console.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
+                } else
+                {
+                    //password mismatch
+                    ViewBag.Message = passdata;
+                    return View("Proba");
+                }
             }
             dbconn.Close();
-
-                
-                        
             ViewBag.Message = passdata;
-
             return View("Proba");
         }
         public ActionResult Reg(string username, string password, string password2)
@@ -91,29 +91,22 @@ namespace masodik
             };
             if (password != password2) return View("Register");
 
-            int ido = 5555;
-            string connectionstring = "Data Source=C:/Users/salma/Desktop/Adatbazis_alkalmazasok/marak/DBA/masodik/database.db;Version=3;";
-            using SQLiteConnection dbconn = new SQLiteConnection(connectionstring);
+            
+            SQLiteConnection dbconn = Globals.Dbconn;
             dbconn.Open();
 
-
-
-            SQLiteCommand cmd = new SQLiteCommand("insert into users (username, password, created_at) values( @productId,@email,@ido)", dbconn);
-            cmd.Parameters.Add(new SQLiteParameter("@productId", username));
-            cmd.Parameters.Add(new SQLiteParameter("@email", password));
-            cmd.Parameters.Add(new SQLiteParameter("@ido", ido));
-
+            using var cmd = new SQLiteCommand(dbconn);
+            cmd.CommandText = "INSERT INTO users (username, password, created_at) values(@username, @password, @created_at)";
+            cmd.Parameters.AddWithValue("@username", username);
+            cmd.Parameters.AddWithValue("@password", password);
+            cmd.Parameters.AddWithValue("@created_at", (string)(DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds.ToString());
+            cmd.Prepare();
             cmd.ExecuteNonQuery();
+
             dbconn.Close();
 
-
-
             ViewBag.Message = passdata;
-
             return View("Proba");
         }
-
-
-
     }
 }
