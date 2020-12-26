@@ -7,42 +7,55 @@
 
 <html>
 <head>
-    <meta charset="utf-8" />
+    
+    @*<meta charset="utf-8 " http-equiv="refresh" content="2;URL= "/Proba" />*@
     <title></title>
 </head>
 <body>
-    @*@{
-        var data = ViewBag.Message;
+    @{
+            var data = ViewBag.Message;
 
-    }*@
-    <h1>Bejelentkezve</h1>
-    password
-    @*<h3>username: @data.password</h3>
-    <h3>password: @data.username</h3>*@
-    <div class="container">
-        <img src="/w3images/bandmember.jpg" alt="Avatar">
-        <p>Hello. How are you today?</p>
-        <span class="time-right">11:00</span>
-    </div>
+        }
+    <h1>Welcome @data to the chat app!</h1>
+    <br />
+    Send message
+    <input type="text" name="name" id='value'>
 
-    <div class="container darker">
-        <img src="/w3images/avatar_g2.jpg" alt="Avatar" class="right">
-        <p>Hey! I'm fine. Thanks for asking!</p>
-        <span class="time-left">11:01</span>
-    </div>
+    <button type="button">Send message</button>
 
-    <div class="container">
-        <img src="/w3images/bandmember.jpg" alt="Avatar">
-        <p>Sweet! So, what do you wanna do today?</p>
-        <span class="time-right">11:02</span>
-    </div>
+    <table id="mytable" align="center">
+        <thead>
+        </thead>
+        <tbody id='content'>
+        </tbody>
+    </table>
 
-    <div class="container darker">
-        <img src="/w3images/avatar_g2.jpg" alt="Avatar" class="right">
-        <p>Nah, I dunno. Play soccer.. or learn more coding perhaps?</p>
-        <span class="time-left">11:05</span>
-    </div>
+
+
 
 </body>
+<script>
+    var field = document.getElementById("value");
+    var button = document.querySelector('button');
+
+    if (button) {
+        button.addEventListener('click', addValue, false);
+    }
+
+    function addValue() {
+        if (field.value !== '') {
+            var table = document.querySelector('#content');
+
+            var tr = document.createElement('tr');
+            var td = document.createElement('td');
+
+            td.innerText = field.value;
+            tr.appendChild(td);
+            table.appendChild(tr);
+            field.value = '';
+        }
+    }
+</script>
+
 
 </html>

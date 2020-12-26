@@ -18,13 +18,13 @@ namespace masodik
         
         public ActionResult Index()
         {
-
+            
             System.Diagnostics.Debug.WriteLine(!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")));
             //return View("Session");
             if (!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")))
             {
                 //redirect or view
-                return View("Session");
+                return RedirectToAction("Proba");
             }
             else
             {
@@ -98,15 +98,17 @@ namespace masodik
                     //password mismatch
 
                     Globals.Logger(rdr.GetInt32(0), "Failed login - password mismatch");
-                    ViewBag.Message = passdata;
+                    
+                    
                     isLoggedIn = 0;
                 }
             }
             dbconn.Close();
-            ViewBag.Message = passdata;
+            var name = HttpContext.Session.GetString("user_username");
+            ViewBag.Message = name;
             if (1==isLoggedIn)
             {
-                return View("Proba");
+                return RedirectToAction("Proba");
             }
             else
             {
@@ -130,7 +132,7 @@ namespace masodik
             };
             if (password != password2) return View("Register");
 
-            
+            HttpContext.Session.SetString("user_username",username);
             SQLiteConnection dbconn = Globals.Dbconn;
             dbconn.Open();
 
@@ -144,9 +146,15 @@ namespace masodik
 
             dbconn.Close();
 
-            ViewBag.Message = passdata;
+            
+            return RedirectToAction("Proba");
+        }
+
+        public ActionResult Proba()
+        {
+            var name = HttpContext.Session.GetString("user_username");
+            ViewBag.Message = name;
             return View("Proba");
         }
-        
     }
 }
