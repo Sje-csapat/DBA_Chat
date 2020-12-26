@@ -8,6 +8,7 @@ using masodik.Models;
 using System.Data.SQLite;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Newtonsoft.Json;
 
 namespace masodik
 {
@@ -150,11 +151,33 @@ namespace masodik
             return RedirectToAction("Proba");
         }
 
-        public ActionResult Proba()
+        public IActionResult Proba()
         {
-            var name = HttpContext.Session.GetString("user_username");
-            ViewBag.Message = name;
-            return View("Proba");
+            SQLiteConnection dbconn = Globals.Dbconn;
+            dbconn.Open();
+            //System.Diagnostics.Debug.WriteLine(username);
+
+            using var cmd = new SQLiteCommand(dbconn);
+            cmd.CommandText = "SELECT id,username FROM users ORDER BY username COLLATE NOCASE ASC";
+            cmd.Prepare();
+            SQLiteDataReader rdr = cmd.ExecuteReader();
+
+            Dictionary<Int32, string> users =new Dictionary<Int32, string>();
+            while (rdr.Read())
+            {
+                //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
+                users.Add(rdr.GetInt32(0), rdr.GetString(1));
+
+            }
+            dbconn.Close();
+            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(users));
+            //ViewBag.Message = name;
+
+            var felhasznalok = JsonConvert.SerializeObject(users);
+
+            return Ok(felhasznalok);
+
+
         }
     }
 }
