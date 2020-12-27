@@ -29,6 +29,9 @@
     </table>
 
     <h2>Messages</h2>
+    <button id="closebtn">Close</button>
+    <table id="messages">
+    </table>
 
     Send message
     <input type="text" name="name" id='value'>
@@ -73,10 +76,45 @@
         checkUsers(); //first call
         setInterval(checkUsers, 30*1000) //repeated call
 
+        function getMessages(id) {
+            console.log(id);
+            $.ajax({
+                url: "/Chat/GetMessages/" + id,
+                success: function (result) {
+                    $('#messages').empty();
+                    $.each(result, function (index, value) {
+                        if (value.own_message) {
+                            $('#messages').append("<tr><td align=\"right\"><strong>" + value.message + "</strong></td></tr>");
+                        } else {
+                            $('#messages').append("<tr><td align=\"left\">" + value.message + "</td></tr>");
+                        }
+                    });
+                }
+            });
+        }
+
+        var timer;
         $("#userlist").on('click', 'button', function () {
-            alert($(this).data("id"));
+            var receiver = $(this).data("id");
+            console.log("Selected user: " + receiver);
+            getMessages(receiver);
+            if (timer) {
+                //timer = setInterval(getMessages(receiver), 10 * 1000);
+                clearInterval(timer);
+                timer = setInterval(function () { getMessages(receiver); }, 1 * 1000);
+                console.log(timer);
+            } else {
+                timer = setInterval(function () { getMessages(receiver); }, 1 * 1000);
+            }
         }); 
 
+        $("#closebtn").click(function () {
+            $('#messages').empty();
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        });
     }); 
 </script>
 </html>

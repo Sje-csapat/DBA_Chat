@@ -149,8 +149,21 @@ namespace masodik
 
             dbconn.Close();
 
-            
-            return RedirectToAction("Proba");
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Route("logout")]
+        [HttpGet]
+        public ActionResult Logout()
+        {
+            var id = HttpContext.Session.GetString("user_id");
+            Models.User tmp_user = new Models.User(Convert.ToInt32(id));
+            Globals.Logger(tmp_user.id, "User logged out");
+            tmp_user.status = 0;
+            tmp_user.save();
+
+            HttpContext.Session.Clear();
+            return RedirectToAction(nameof(Index));
         }
     }
 }
