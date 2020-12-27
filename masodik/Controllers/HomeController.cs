@@ -15,27 +15,27 @@ namespace masodik
     public class HomeController : Controller
     {
 
-        // GET: HomeController
-        
         public ActionResult Index()
         {
             //return View("Session");
-            if ((HttpContext.Session.GetString("logged_in")!=null))
+            if ((HttpContext.Session.GetString("logged_in") != null))
             {
-                //redirect or view
-                return RedirectToAction("Proba");
+                ViewData["session"] = "true";
+                return RedirectToAction("Index", "Chat");
             }
             else
             {
+                ViewData["session"] = null;
                 return RedirectToAction(nameof(Login));
             }
-            
         }
 
         [Route("login")]
         [HttpGet]
         public ActionResult Login()
         {
+            ViewData["session"] = null;
+            ViewData["page"] = "Login";
             return View();
         }
 
@@ -43,33 +43,15 @@ namespace masodik
         [HttpGet]
         public ActionResult Register()
         {
+            ViewData["session"] = null;
+            ViewData["page"] = "Register";
             return View();
         }
 
-        [Route("login")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Login(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
         [Route("Log")]
         [HttpPost]
         public ActionResult Log(string username, string password)
         {
-            
-            Home passdata = new Home
-            {
-                username = username,
-                password = password
-            };
             
             SQLiteConnection dbconn = Elerhato.Dbconn;
             dbconn.Open();
@@ -82,89 +64,118 @@ namespace masodik
             SQLiteDataReader rdr = cmd.ExecuteReader();
 
             int isLoggedIn = 0;
-            while (rdr.Read())
+            List<string> errors = new List<string>();
+            if(rdr.HasRows)
             {
-                Models.User user = new Models.User(rdr.GetInt32(0));
-                //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
-                string db_password = rdr.GetString(1);
-                bool pwd_verify = Elerhato.VerifyPassword(db_password, password);
-                if (pwd_verify) {
-                    ViewBag.Message = passdata;
-                    user.status = 1;
-                    user.save();
-
-                    HttpContext.Session.SetString("logged_in", "1");
-                    HttpContext.Session.SetString("user_id", user.id.ToString());
-                    HttpContext.Session.SetString("session_username", user.username);
-                    isLoggedIn = 1;
-                    
-                    Elerhato.Logger(user.id, "Login succes");
-                } else
+                while (rdr.Read())
                 {
-                    //password mismatch
-                    Elerhato.Logger(user.id, "Failed login - password mismatch");
-                    ViewBag.Message = "Rossz jelszo vagy user";
-                    isLoggedIn = 0;
+                    Models.User user = new Models.User(rdr.GetInt32(0));
+                    //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
+                    string db_password = rdr.GetString(1);
+                    bool pwd_verify = Elerhato.VerifyPassword(db_password, password);
+                    if (pwd_verify)
+                    {
+                        user.status = 1;
+                        user.save();
+
+                        HttpContext.Session.SetString("logged_in", "1");
+                        HttpContext.Session.SetString("user_id", user.id.ToString());
+                        HttpContext.Session.SetString("user_username", user.username);
+                        isLoggedIn = 1;
+
+                        Elerhato.Logger(user.id, "Login succes");
+                    }
+                    else
+                    {
+                        //password mismatch
+                        Elerhato.Logger(user.id, "Failed login - password mismatch");
+                        errors.Add("Hibás felhasználónév vagy jelszó!");
+                        isLoggedIn = 0;
+                    }
                 }
+            } else
+            {
+                errors.Add("Hibás felhasználónév vagy jelszó!");
             }
-            dbconn.Close();
-            var name = HttpContext.Session.GetString("session_username");
             
+            dbconn.Close();
             if (isLoggedIn == 1)
             {
-                ViewBag.Message = name;
-                return RedirectToAction("Index", "Chat");
+                return RedirectToAction(nameof(Index));
+                //return RedirectToAction("Index", "Chat");
             }
             else
             {
+                ViewData["page"] = "Login";
+                if(errors.Count() >= 1)
+                {
+                    ViewData["session"] = null;
+                    ViewData["page"] = "Login";
+                    ViewBag.AlertType = "danger";
+                    ViewBag.AlertMsg = "Az űrlap beküldése során a következő hibákat találtuk:\r\n" + string.Join("\r\n", errors);
+                }
+                //ViewData["errors"] = "Login";
                 return View("Login");
             }
-            
         }
 
         [Route("Reg")]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Reg(string username, string password, string password2)
         {
-            string hashed = Elerhato.HashPassword(password, null, false);
+            
+            List<string> errors = new List<string>();
 
-            Register passdata = new Register
+            if ( (username == null || password == null || password2 == null) || (username == "" || password == "" || password2 == ""))
             {
-                username = hashed,
-                password = password,
-                password2 = password2
-            };
+                errors.Add("Üres bemenet!");
+            }
+
             if (password != password2)
             {
-                ViewBag.Message = "Nem eggyezik a jelszo";
-                return View("Register");
+                errors.Add("A megadott jelszavak nem egyeznek meg!");
             }
 
+            if(errors.Count() == 0) {
+                try
+                {
+                    string hashed = Elerhato.HashPassword(password, null, false);
 
-            try
+                    SQLiteConnection dbconn = Elerhato.Dbconn;
+                    dbconn.Open();
+
+                    using var cmd = new SQLiteCommand(dbconn);
+                    cmd.CommandText = "INSERT INTO users (username, password, status, created_at) values(@username, @password, @status, @created_at)";
+                    cmd.Parameters.AddWithValue("@username", username);
+                    cmd.Parameters.AddWithValue("@password", hashed);
+                    cmd.Parameters.AddWithValue("@status", "0");
+                    cmd.Parameters.AddWithValue("@created_at", (string)(DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds.ToString());
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+
+                    dbconn.Close();
+
+                    ViewData["session"] = null;
+                    ViewData["page"] = "Login";
+                    ViewBag.AlertType = "success";
+                    ViewBag.AlertMsg = "Sikeres regisztráció! Mostmár beléphetsz!";
+                    return View("Login");
+                }
+                catch
+                {
+                    errors.Add("Ilyen nevű felhasználó már létezik!");
+                }
+            }
+
+            if(errors.Count() > 0)
             {
-                HttpContext.Session.SetString("session_username", username);
-
-                SQLiteConnection dbconn = Elerhato.Dbconn;
-                dbconn.Open();
-
-                using var cmd = new SQLiteCommand(dbconn);
-                cmd.CommandText = "INSERT INTO users (username, password, created_at) values(@username, @password, @created_at)";
-                cmd.Parameters.AddWithValue("@username", username);
-                cmd.Parameters.AddWithValue("@password", hashed);
-                cmd.Parameters.AddWithValue("@created_at", (string)(DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds.ToString());
-                cmd.Prepare();
-                cmd.ExecuteNonQuery();
-
-                dbconn.Close();
-
-                return RedirectToAction(nameof(Index));
+                ViewBag.AlertType = "danger";
+                ViewBag.AlertMsg = "Az űrlap beküldése során a következő hibákat találtuk:\r\n" + string.Join("\r\n", errors);
             }
-            catch
-            {
-                ViewBag.Message = "Letezo felhasznalo";
-                return View("Register");
-            }
+            ViewData["session"] = null;
+            ViewData["page"] = "Register";
+            return View("Register");
         }
 
         [Route("Logout")]
@@ -177,7 +188,8 @@ namespace masodik
             tmp_user.status = 0;
             tmp_user.save();
             HttpContext.Session.Clear();
-            return View("Login");
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

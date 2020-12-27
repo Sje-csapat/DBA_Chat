@@ -19,7 +19,9 @@ namespace masodik.Controllers
             //return View("Session");
             if (!string.IsNullOrEmpty(HttpContext.Session.GetString("logged_in")))
             {
-                ViewBag.Message = HttpContext.Session.GetString("session_username");
+                ViewData["page"] = "Chat";
+                ViewData["session"] = "true";
+                ViewBag.Message = HttpContext.Session.GetString("user_username");
                 return View();
             }
             else
@@ -28,79 +30,14 @@ namespace masodik.Controllers
             }
         }
 
-        // GET: HomeController1/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: HomeController1/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: HomeController1/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: HomeController1/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: HomeController1/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: HomeController1/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: HomeController1/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
         [HttpGet]
         [Produces("application/json")]
         public IActionResult GetUsers()
         {
+            if(string.IsNullOrEmpty(HttpContext.Session.GetString("logged_in")))
+            {
+                return Json(new { error = "Lost session"} );
+            }
             SQLiteConnection dbconn = Elerhato.Dbconn;
             dbconn.Open();
             //System.Diagnostics.Debug.WriteLine(username);
@@ -134,6 +71,10 @@ namespace masodik.Controllers
         [Produces("application/json")]
         public IActionResult GetMessages(int id)
         {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("logged_in")))
+            {
+                return Json(new { error = "Lost session" });
+            }
             SQLiteConnection dbconn = Elerhato.Dbconn;
             dbconn.Open();
             //System.Diagnostics.Debug.WriteLine(username);
@@ -166,7 +107,6 @@ namespace masodik.Controllers
         [HttpPost]
         public ActionResult SendMessage(IFormCollection collection)
         {
-            
             try
             {
                 var id=collection["id"];

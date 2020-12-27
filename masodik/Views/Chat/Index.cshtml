@@ -1,68 +1,62 @@
 ﻿@using masodik.Models
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Chat";
     var data = ViewBag.Message;
 }
 
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <p class="m-0 p-0">Logged in as <strong>@data</strong>!</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-10 col-xl-10">
+            <div class="row">
+                <!-- User list -->
+                <div class="col-md-3">
+                    <div class="card" style="height: 100%;">
+                        <div class="card-header">Felhasználók</div>
+                        <div class="card-body">
+                            <div class="list-group" id="userlist">
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Messages -->
+                <div class="col-md-9">
+                    <div class="card" style="height: 100%;">
+                        <div class="card-body" id="messages">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+            <form>
+                <div class="form-group">
+                    <label for="message_box">Üzenet</label>
+                    <input type="text" class="form-control" name="message_box" id="message_box" disabled></input>
+                </div>
+                <button type="button" id="send_message" class="btn btn-primary btn-block" disabled>Küldés</button>
+                <button type="button" id="close_chat" class="btn btn-danger btn-block">Bezárás</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Chat</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-</head>
-<body>
-    <h1>Welcome @ViewBag.Message to the chat app!</h1>
-    <h2>Users</h2>
-    <table id="userlist">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Username</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-
-    <h2>Messages</h2>
-    <table>
-        <tr>
-            <td>
-                <button id="closebtn">Close</button>
-                <form name="form1" method="get" action="Logout">
-                    <input name="submit2" type="submit" id="submit2" value="log out">
-                </form>
-            </td>
-
-        </tr>
-    </table>
-
-    <table id="messages">
-    </table>
-
-    <form>
-        <input type="text" name="message" id="message_box" placeholder="Type your text" /><br />
-        <input type="button" name="submit" id="send_message" value="send message" />
-    </form>
-</body>
-
-
-
-<script>
+@section Scripts {
+    <script>
         $(document).ready(function () {
             function chatnow(id) {
                 alert("The user id is" + id)
@@ -72,14 +66,15 @@
                 $.ajax({
                     url: "/Chat/GetUsers",
                     success: function (result) {
-                        $('#userlist > tbody').empty();
+                        $('#userlist').empty();
                         $.each(result, function (index, value) {
-                            $('#userlist > tbody').append(
-                                "<tr><td>" + (index + 1) + "</td>" +
-                                "<td>" + value.username + "</td>" +
-                                "<td>" + value.status + "</td>" +
-                                "<td><button type=\"button\" data-id=" + value.id + " class=\"chatnow\">Chat NOW!</button></td>" +
-                                "</tr>"
+                            if (value.status == 0) {
+                                var color = "list-group-item-dark";
+                            } else {
+                                var color = "list-group-item-success";
+                            }
+                            $('#userlist').append(
+                                "<button type=\"button\" data-id=" + value.id + " class=\"list-group-item list-group-item-action " + color + "\">" + value.username + "</button>"
                             );
                         });
                     }
@@ -93,12 +88,22 @@
                 $.ajax({
                     url: "/Chat/GetMessages/" + id,
                     success: function (result) {
+                        if (result.error) {
+                            if (timer) {
+                                clearInterval(timer);
+                                timer = null;
+                            }
+                            alert("Communication error! Please reload!");
+                            $('#messages').empty();
+                            return;
+                        }
+
                         $('#messages').empty();
                         $.each(result, function (index, value) {
                             if (value.own_message) {
-                                $('#messages').append("<tr><td align=\"right\"><strong>" + value.message + "</strong></td></tr>");
+                                $('#messages').append("<p class=\"w-75 p-1 float-right text-right bg-primary text-white border border-primary rounded\">" + value.message + "</p><div class=\"clearfix\"></div>");
                             } else {
-                                $('#messages').append("<tr><td align=\"left\">" + value.message + "</td></tr>");
+                                $('#messages').append("<p class=\"w-75 p-1 float-left text-left bg-white text-dark border border-dark rounded\">" + value.message + "</p><div class=\"clearfix\"></div>");
                             }
                         });
                     }
@@ -112,6 +117,8 @@
                 chattingwith = receiver;
                 console.log("Selected user: " + receiver);
                 getMessages(receiver);
+                $("#message_box").prop("disabled", false);
+                $("#send_message").prop("disabled", false);
                 if (timer) {
                     //timer = setInterval(getMessages(receiver), 10 * 1000);
                     clearInterval(timer);
@@ -122,14 +129,17 @@
                 }
             });
 
-            $("#closebtn").click(function () {
+            $("#close_chat").click(function () {
                 chattingwith = null;
+                $("#message_box").prop("disabled", true);
+                $("#send_message").prop("disabled", true);
                 $('#messages').empty();
                 if (timer) {
                     clearInterval(timer);
                     timer = null;
                 }
             });
+
             function SendMessage(receiver, message) {
                 $.post("/Chat/SendMessage",
                     {
@@ -138,17 +148,12 @@
                     },
                     function (data, status) {
                         //alert("Data: " + data + "\nStatus: " + status);
-
                     });
             }
             $("#send_message").click(function () {
                 SendMessage(chattingwith, $("#message_box").val());
+                $("#message_box").val("");
             });
         });
-
-
-
     </script>
-
-
-</html>
+}

@@ -1,0 +1,61 @@
+﻿@{ 
+    
+
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="University assignment">
+    <meta name="author" content="Gejza Molnár & Kristián Salma">
+    <title>@ViewData["Title"]</title>
+    <!-- Bootstrap core CSS -->
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">DBA ChatApp</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    @if (@ViewData["session"] != null)
+                    {
+                        <li class="nav-item @(@ViewData["page"] == "Chat" ? "active" : "")">
+                            <a class="nav-link" href="/Chat">Chat</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Kijelentkezés</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item @(@ViewData["page"] == "Login" ? "active" : "")">
+                            <a class="nav-link" href="/login">Bejelentkezés</a>
+                        </li>
+                        <li class="nav-item @(@ViewData["page"] == "Register" ? "active" : "")">
+                            <a class="nav-link" href="/register">Regisztráció</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    @RenderBody()
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="~/js/jquery-3.5.1.min.js"></script>
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -62,7 +62,7 @@ namespace masodik
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
-
+            services.AddMemoryCache();
             services.AddControllers();
             services.AddMvc();
         }

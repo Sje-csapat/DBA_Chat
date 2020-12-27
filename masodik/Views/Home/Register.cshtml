@@ -1,28 +1,64 @@
-﻿@using masodik.Models
-@{
-    Layout = null;
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Regisztráció";
     var data = ViewBag.Message;
+    var is_alert = ViewBag.AlertType != null ? true : false;
+    var alert_type = ViewBag.AlertType;
+    var alert_msg = ViewBag.AlertMsg;
 }
-<form action="Reg" method="post">
-    <input type="text" name="username" placeholder="Username" /><br />
-    <input type="password" name="password" placeholder="Password" /><br />
-    <input type="password" name="password2" placeholder="repeat password" /><br />
-    @Html.AntiForgeryToken()
-    <input type="submit" name="submit" value="Register" />
-</form>
-@{
-    if (!String.IsNullOrEmpty(data))
+
+@if (is_alert)
+{
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+        <div class="alert alert-@alert_type alert-dismissible fade show" role="alert">
+            <p class="m-0 p-0">@alert_msg</p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+</div>}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">@ViewData["Title"]</div>
+            <div class="card-body">
+                <form action="/Reg" method="POST">
+                    <div class="form-group row">
+                        <label for="username" class="col-md-4 col-form-label text-md-right">Felhasználónév</label>
+                        <div class="col-md-6">
+                            <input type="text" id="username" class="form-control" name="username" placeholder="Felhasználónév" required autofocus />
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="password" class="col-md-4 col-form-label text-md-right">Jelszó</label>
+                        <div class="col-md-6">
+                            <input type="password" id="password" class="form-control" name="password" placeholder="Jelszó" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="password2" class="col-md-4 col-form-label text-md-right">Jelszó</label>
+                        <div class="col-md-6">
+                            <input type="password" id="password2" class="form-control" name="password2" placeholder="Jelszó mégegyszer" required>
+                        </div>
+                    </div>
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="col-md-6 offset-md-4">
+                        <button type="submit" class="btn btn-primary">Regisztráció</button>
+                        <a href="/login" class="btn btn-link">Bejelentkezés</a>
+                    </div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@{ if (!String.IsNullOrEmpty(data))
     {
-    <h4 style="color:red">@ViewBag.Message</h4>
-    }
-
-}
-
-
-<script>
-
-    function checkPassword() {
-        alert("Please enter Password");
-    }
-</script>
-
+<h4 style="color:red">@ViewBag.Message</h4> } }
