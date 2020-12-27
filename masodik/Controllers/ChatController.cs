@@ -161,5 +161,35 @@ namespace masodik.Controllers
             messages.Reverse();
             return Json(messages.ToArray());
         }
+
+        [HttpPost]
+        public ActionResult SendMessage(IFormCollection collection)
+        {
+            
+            try
+            {
+                var id=collection["id"];
+                System.Diagnostics.Debug.WriteLine(id);
+
+                SQLiteConnection dbconn = Globals.Dbconn;
+                dbconn.Open();
+
+                using var cmd = new SQLiteCommand(dbconn);
+                cmd.CommandText = "INSERT INTO messages (sender, receiver, message, created_at) values(@sender, @receiver, @message, @created_at)";
+                cmd.Parameters.AddWithValue("@sender", HttpContext.Session.GetString("user_id"));
+                cmd.Parameters.AddWithValue("@receiver", collection["id"]);
+                cmd.Parameters.AddWithValue("@message", collection["msg"]);
+                cmd.Parameters.AddWithValue("@created_at", (int)DateTimeOffset.Now.ToUnixTimeSeconds());
+                cmd.Prepare();
+                cmd.ExecuteNonQuery();
+
+                dbconn.Close();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
     }
 }

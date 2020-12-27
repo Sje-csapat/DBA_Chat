@@ -34,21 +34,10 @@
     </table>
 
     Send message
-    <input type="text" name="name" id='value'>
-
-    <button type="button">Send message</button>
-
-    <table id="mytable" align="center">
-        <thead>
-        </thead>
-        <tbody id='content'>
-        </tbody>
-    </table>
-
-    <button class="chatnow">Chat NOW!</button>
-    <button type="button" data-id="14" class="chatnow">Chat NOW!</button>
-
-
+    <form>
+        <input type="text" name="message" id="message_box" placeholder="Type your text" /><br />
+        <input type="button" name="submit" id="send_message" value="send message" />
+    </form>
 </body>
 <script>
     $(document).ready(function () {
@@ -64,9 +53,9 @@
                     $.each(result, function (index, value) {
                         $('#userlist > tbody').append(
                             "<tr><td>" + (index + 1) + "</td>" +
-                            "<td>" + value.username + "</td>" + 
+                            "<td>" + value.username + "</td>" +
                             "<td>" + value.status + "</td>" +
-                            "<td><button type=\"button\" data-id="+ value.id +" class=\"chatnow\">Chat NOW!</button></td>" +
+                            "<td><button type=\"button\" data-id=" + value.id + " class=\"chatnow\">Chat NOW!</button></td>" +
                             "</tr>"
                         );
                     });
@@ -74,7 +63,7 @@
             });
         }
         checkUsers(); //first call
-        setInterval(checkUsers, 30*1000) //repeated call
+        setInterval(checkUsers, 30 * 1000) //repeated call
 
         function getMessages(id) {
             console.log(id);
@@ -94,27 +83,47 @@
         }
 
         var timer;
+        var chattingwith;
         $("#userlist").on('click', 'button', function () {
             var receiver = $(this).data("id");
+            chattingwith = receiver;
             console.log("Selected user: " + receiver);
             getMessages(receiver);
             if (timer) {
                 //timer = setInterval(getMessages(receiver), 10 * 1000);
                 clearInterval(timer);
-                timer = setInterval(function () { getMessages(receiver); }, 1 * 1000);
+                timer = setInterval(function () { getMessages(receiver); }, 3 * 1000);
                 console.log(timer);
             } else {
-                timer = setInterval(function () { getMessages(receiver); }, 1 * 1000);
+                timer = setInterval(function () { getMessages(receiver); }, 3 * 1000);
             }
-        }); 
+        });
 
         $("#closebtn").click(function () {
+            chattingwith = null;
             $('#messages').empty();
             if (timer) {
                 clearInterval(timer);
                 timer = null;
             }
         });
+        function SendMessage(receiver, message) {
+            $.post("/Chat/SendMessage",
+                {
+                    id: receiver,
+                    msg: message
+                },
+                function (data, status) {
+                    //alert("Data: " + data + "\nStatus: " + status);
+
+                });
+        }
+            $("#send_message").click(function () {
+                SendMessage(chattingwith, $("#message_box").val());
+            });
     }); 
+
+    
+
 </script>
 </html>
