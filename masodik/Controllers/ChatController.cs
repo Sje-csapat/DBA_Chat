@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,6 +14,7 @@ namespace masodik.Controllers
         // GET: HomeController1
         public ActionResult Index()
         {
+            ViewBag.Message = HttpContext.Session.GetString("user_username");
             return View();
         }
 
@@ -82,6 +85,39 @@ namespace masodik.Controllers
             {
                 return View();
             }
+        }
+
+        [HttpGet]
+        [Produces("application/json")]
+        public IActionResult GetUsers()
+        {
+            SQLiteConnection dbconn = Globals.Dbconn;
+            dbconn.Open();
+            //System.Diagnostics.Debug.WriteLine(username);
+
+            using var cmd = new SQLiteCommand(dbconn);
+            cmd.CommandText = "SELECT id,username FROM users ORDER BY username COLLATE NOCASE ASC";
+            cmd.Prepare();
+            SQLiteDataReader rdr = cmd.ExecuteReader();
+
+            Dictionary<string, string> users = new Dictionary<string, string>();
+            List<Models.User> asd = new List<Models.User>();
+            while (rdr.Read())
+            {
+                Models.User tmp = new Models.User(rdr.GetInt32(0));
+                asd.Add(tmp);
+                //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
+                users.Add((string)rdr.GetInt32(0).ToString(), rdr.GetString(1));
+
+            }
+            dbconn.Close();
+
+            return Json(asd.ToArray());
+
+            /*System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(users));
+            //ViewBag.Message = name;
+            var felhasznalok = JsonConvert.SerializeObject(users);*/
+            //return Ok(users);
         }
     }
 }

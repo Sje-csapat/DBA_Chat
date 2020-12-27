@@ -1,0 +1,82 @@
+﻿@using masodik.Models
+@{
+    Layout = null;
+    var data = ViewBag.Message;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Chat</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Welcome @ViewBag.Message to the chat app!</h1>
+    <h2>Users</h2>
+    <table id="userlist" border="1">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <h2>Messages</h2>
+
+    Send message
+    <input type="text" name="name" id='value'>
+
+    <button type="button">Send message</button>
+
+    <table id="mytable" align="center">
+        <thead>
+        </thead>
+        <tbody id='content'>
+        </tbody>
+    </table>
+
+    <button class="chatnow">Chat NOW!</button>
+    <button type="button" data-id="14" class="chatnow">Chat NOW!</button>
+
+
+</body>
+<script>
+    $(document).ready(function () {
+        function chatnow(id) {
+            alert("The user id is" + id)
+        }
+
+        function checkUsers() {
+            $.ajax({
+                url: "/Chat/GetUsers",
+                success: function (result) {
+                    $('#userlist > tbody').empty();
+                    $.each(result, function (index, value) {
+                        $('#userlist > tbody').append(
+                            "<tr><td>" + (index + 1) + "</td>" +
+                            "<td>" + value.username + "</td>" + 
+                            "<td>" + value.status + "</td>" +
+                            "<td><button type=\"button\" data-id="+ value.id +" class=\"chatnow\">Chat NOW!</button></td>" +
+                            "</tr>"
+                        );
+                    });
+                }
+            });
+        }
+        checkUsers(); //first call
+        setInterval(checkUsers, 30*1000) //repeated call
+
+        $("#userlist").on('click', 'button', function () {
+            alert($(this).data("id"));
+        }); 
+
+    }); 
+</script>
+</html>

@@ -43,7 +43,7 @@ namespace masodik
             DateTime now = DateTime.Now;
             string created_at = now.ToString();
             using var cmd = new SQLiteCommand(dbconn); 
-            cmd.CommandText = "INSERT INTO Log(user_id,message,created_at) values(@user_id, @message, @created_at)";
+            cmd.CommandText = "INSERT INTO log(user_id,message,created_at) values(@user_id, @message, @created_at)";
             cmd.Parameters.AddWithValue("@user_id", user_id.ToString());
             cmd.Parameters.AddWithValue("@message", message);
             cmd.Parameters.AddWithValue("@created_at", created_at);

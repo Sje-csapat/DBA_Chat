@@ -76,7 +76,7 @@ namespace masodik
             //System.Diagnostics.Debug.WriteLine(username);
 
             using var cmd = new SQLiteCommand(dbconn);
-            cmd.CommandText = "SELECT * FROM users WHERE `username` = @username";
+            cmd.CommandText = "SELECT id, password FROM users WHERE `username` = @username";
             cmd.Parameters.AddWithValue("@username", username);
             cmd.Prepare();
             SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -84,32 +84,34 @@ namespace masodik
             int isLoggedIn = 0;
             while (rdr.Read())
             {
+                Models.User user = new Models.User(rdr.GetInt32(0));
                 //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
-                string db_password = rdr.GetString(2);
+                string db_password = rdr.GetString(1);
                 bool pwd_verify = Globals.VerifyPassword(db_password, password);
                 if (pwd_verify) {
                     ViewBag.Message = passdata;
+                    user.status = 1;
+                    user.save();
+
                     HttpContext.Session.SetString("is_logged_in", "1");
-                    HttpContext.Session.SetString("user_id", rdr.GetInt32(0).ToString());
-                    HttpContext.Session.SetString("user_username", rdr.GetString(1).ToString());
+                    HttpContext.Session.SetString("user_id", user.id.ToString());
+                    HttpContext.Session.SetString("user_username", user.username);
                     isLoggedIn = 1;
-                    Globals.Logger(rdr.GetInt32(0), "Login succes");
+                    
+                    Globals.Logger(user.id, "Login succes");
                 } else
                 {
                     //password mismatch
-
-                    Globals.Logger(rdr.GetInt32(0), "Failed login - password mismatch");
-                    
-                    
+                    Globals.Logger(user.id, "Failed login - password mismatch");
                     isLoggedIn = 0;
                 }
             }
             dbconn.Close();
             var name = HttpContext.Session.GetString("user_username");
             ViewBag.Message = name;
-            if (1==isLoggedIn)
+            if (isLoggedIn == 1)
             {
-                return RedirectToAction("Proba");
+                return RedirectToAction("Index", "Chat");
             }
             else
             {
@@ -149,35 +151,6 @@ namespace masodik
 
             
             return RedirectToAction("Proba");
-        }
-
-        public IActionResult Proba()
-        {
-            SQLiteConnection dbconn = Globals.Dbconn;
-            dbconn.Open();
-            //System.Diagnostics.Debug.WriteLine(username);
-
-            using var cmd = new SQLiteCommand(dbconn);
-            cmd.CommandText = "SELECT id,username FROM users ORDER BY username COLLATE NOCASE ASC";
-            cmd.Prepare();
-            SQLiteDataReader rdr = cmd.ExecuteReader();
-
-            Dictionary<Int32, string> users =new Dictionary<Int32, string>();
-            while (rdr.Read())
-            {
-                //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
-                users.Add(rdr.GetInt32(0), rdr.GetString(1));
-
-            }
-            dbconn.Close();
-            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(users));
-            //ViewBag.Message = name;
-
-            var felhasznalok = JsonConvert.SerializeObject(users);
-
-            return Ok(felhasznalok);
-
-
         }
     }
 }

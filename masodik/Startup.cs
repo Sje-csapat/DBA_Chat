@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,29 @@ namespace masodik
             Configuration = configuration;
             contentRoot = env.ContentRootPath;
             Globals.TestDBConnection(contentRoot);
+            setUsersToOffline();
+        }
+
+        public void setUsersToOffline()
+        {
+            SQLiteConnection dbconn = Globals.Dbconn;
+            int conn_status = 0;
+            if (dbconn != null && dbconn.State == ConnectionState.Closed)
+            {
+                conn_status = 1;
+                dbconn.Open();
+            }
+            using var cmd = new SQLiteCommand(dbconn);
+            cmd.CommandText = "UPDATE users SET status = @status, updated_at = @updated_at";
+            cmd.Parameters.AddWithValue("@status", 0);
+            cmd.Parameters.AddWithValue("@updated_at", (int)DateTimeOffset.Now.ToUnixTimeSeconds());
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+
+            if (Convert.ToBoolean(conn_status))
+            {
+                dbconn.Close();
+            }
         }
 
         public IConfiguration Configuration { get; }
