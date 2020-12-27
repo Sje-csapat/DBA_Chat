@@ -18,7 +18,7 @@ namespace masodik.Models
 
         public User(int id)
         {
-            SQLiteConnection dbconn = Globals.Dbconn;
+            SQLiteConnection dbconn = Elerhato.Dbconn;
             int conn_status = 0;
             if (dbconn != null && dbconn.State == ConnectionState.Closed)
             {
@@ -49,10 +49,13 @@ namespace masodik.Models
                 dbconn.Close();
             }
         }
+        public User(int id,string username)
+        {
 
+        }
         public bool save()
         {
-            SQLiteConnection dbconn = Globals.Dbconn;
+            SQLiteConnection dbconn = Elerhato.Dbconn;
             int conn_status = 0;
             if (dbconn != null && dbconn.State == ConnectionState.Closed)
             {

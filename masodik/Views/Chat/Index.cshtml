@@ -4,6 +4,16 @@
     var data = ViewBag.Message;
 }
 
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
 <!DOCTYPE html>
 
 <html>
@@ -15,7 +25,7 @@
 <body>
     <h1>Welcome @ViewBag.Message to the chat app!</h1>
     <h2>Users</h2>
-    <table id="userlist" border="1">
+    <table id="userlist">
         <thead>
             <tr>
                 <th>#</th>
@@ -29,101 +39,116 @@
     </table>
 
     <h2>Messages</h2>
-    <button id="closebtn">Close</button>
+    <table>
+        <tr>
+            <td>
+                <button id="closebtn">Close</button>
+                <form name="form1" method="get" action="Logout">
+                    <input name="submit2" type="submit" id="submit2" value="log out">
+                </form>
+            </td>
+
+        </tr>
+    </table>
+
     <table id="messages">
     </table>
 
-    Send message
     <form>
         <input type="text" name="message" id="message_box" placeholder="Type your text" /><br />
         <input type="button" name="submit" id="send_message" value="send message" />
     </form>
 </body>
+
+
+
 <script>
-    $(document).ready(function () {
-        function chatnow(id) {
-            alert("The user id is" + id)
-        }
-
-        function checkUsers() {
-            $.ajax({
-                url: "/Chat/GetUsers",
-                success: function (result) {
-                    $('#userlist > tbody').empty();
-                    $.each(result, function (index, value) {
-                        $('#userlist > tbody').append(
-                            "<tr><td>" + (index + 1) + "</td>" +
-                            "<td>" + value.username + "</td>" +
-                            "<td>" + value.status + "</td>" +
-                            "<td><button type=\"button\" data-id=" + value.id + " class=\"chatnow\">Chat NOW!</button></td>" +
-                            "</tr>"
-                        );
-                    });
-                }
-            });
-        }
-        checkUsers(); //first call
-        setInterval(checkUsers, 30 * 1000) //repeated call
-
-        function getMessages(id) {
-            console.log(id);
-            $.ajax({
-                url: "/Chat/GetMessages/" + id,
-                success: function (result) {
-                    $('#messages').empty();
-                    $.each(result, function (index, value) {
-                        if (value.own_message) {
-                            $('#messages').append("<tr><td align=\"right\"><strong>" + value.message + "</strong></td></tr>");
-                        } else {
-                            $('#messages').append("<tr><td align=\"left\">" + value.message + "</td></tr>");
-                        }
-                    });
-                }
-            });
-        }
-
-        var timer;
-        var chattingwith;
-        $("#userlist").on('click', 'button', function () {
-            var receiver = $(this).data("id");
-            chattingwith = receiver;
-            console.log("Selected user: " + receiver);
-            getMessages(receiver);
-            if (timer) {
-                //timer = setInterval(getMessages(receiver), 10 * 1000);
-                clearInterval(timer);
-                timer = setInterval(function () { getMessages(receiver); }, 3 * 1000);
-                console.log(timer);
-            } else {
-                timer = setInterval(function () { getMessages(receiver); }, 3 * 1000);
+        $(document).ready(function () {
+            function chatnow(id) {
+                alert("The user id is" + id)
             }
-        });
 
-        $("#closebtn").click(function () {
-            chattingwith = null;
-            $('#messages').empty();
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-        });
-        function SendMessage(receiver, message) {
-            $.post("/Chat/SendMessage",
-                {
-                    id: receiver,
-                    msg: message
-                },
-                function (data, status) {
-                    //alert("Data: " + data + "\nStatus: " + status);
-
+            function checkUsers() {
+                $.ajax({
+                    url: "/Chat/GetUsers",
+                    success: function (result) {
+                        $('#userlist > tbody').empty();
+                        $.each(result, function (index, value) {
+                            $('#userlist > tbody').append(
+                                "<tr><td>" + (index + 1) + "</td>" +
+                                "<td>" + value.username + "</td>" +
+                                "<td>" + value.status + "</td>" +
+                                "<td><button type=\"button\" data-id=" + value.id + " class=\"chatnow\">Chat NOW!</button></td>" +
+                                "</tr>"
+                            );
+                        });
+                    }
                 });
-        }
+            }
+            checkUsers(); //first call
+            setInterval(checkUsers, 30 * 1000) //repeated call
+
+            function getMessages(id) {
+                console.log(id);
+                $.ajax({
+                    url: "/Chat/GetMessages/" + id,
+                    success: function (result) {
+                        $('#messages').empty();
+                        $.each(result, function (index, value) {
+                            if (value.own_message) {
+                                $('#messages').append("<tr><td align=\"right\"><strong>" + value.message + "</strong></td></tr>");
+                            } else {
+                                $('#messages').append("<tr><td align=\"left\">" + value.message + "</td></tr>");
+                            }
+                        });
+                    }
+                });
+            }
+
+            var timer;
+            var chattingwith;
+            $("#userlist").on('click', 'button', function () {
+                var receiver = $(this).data("id");
+                chattingwith = receiver;
+                console.log("Selected user: " + receiver);
+                getMessages(receiver);
+                if (timer) {
+                    //timer = setInterval(getMessages(receiver), 10 * 1000);
+                    clearInterval(timer);
+                    timer = setInterval(function () { getMessages(receiver); }, 3 * 1000);
+                    console.log(timer);
+                } else {
+                    timer = setInterval(function () { getMessages(receiver); }, 3 * 1000);
+                }
+            });
+
+            $("#closebtn").click(function () {
+                chattingwith = null;
+                $('#messages').empty();
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+            });
+            function SendMessage(receiver, message) {
+                $.post("/Chat/SendMessage",
+                    {
+                        id: receiver,
+                        msg: message
+                    },
+                    function (data, status) {
+                        //alert("Data: " + data + "\nStatus: " + status);
+
+                    });
+            }
             $("#send_message").click(function () {
                 SendMessage(chattingwith, $("#message_box").val());
             });
-    }); 
+        });
 
-    
 
-</script>
+
+    </script>
+
+
 </html>

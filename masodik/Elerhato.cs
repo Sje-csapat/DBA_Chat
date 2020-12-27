@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace masodik
 {
-    public static class Globals
+    public static class Elerhato
     {
         public static SQLiteConnection Dbconn { get; set; }
         public static SQLiteConnection Dbasdadsconn { get; set; }
@@ -33,7 +33,7 @@ namespace masodik
         }
         public static void Logger(int user_id,string message)
         {
-            var dbconn = Globals.Dbconn;
+            var dbconn = Elerhato.Dbconn;
             int conn_status = 0;
             if(dbconn != null && dbconn.State == ConnectionState.Closed)
             {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using masodik.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
@@ -14,11 +15,11 @@ namespace masodik.Controllers
         // GET: HomeController1
         public ActionResult Index()
         {
-            System.Diagnostics.Debug.WriteLine(!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")));
+            System.Diagnostics.Debug.WriteLine(!string.IsNullOrEmpty(HttpContext.Session.GetString("logged_in")));
             //return View("Session");
-            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")))
+            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("logged_in")))
             {
-                ViewBag.Message = HttpContext.Session.GetString("user_username");
+                ViewBag.Message = HttpContext.Session.GetString("session_username");
                 return View();
             }
             else
@@ -100,14 +101,14 @@ namespace masodik.Controllers
         [Produces("application/json")]
         public IActionResult GetUsers()
         {
-            SQLiteConnection dbconn = Globals.Dbconn;
+            SQLiteConnection dbconn = Elerhato.Dbconn;
             dbconn.Open();
             //System.Diagnostics.Debug.WriteLine(username);
 
             using var cmd = new SQLiteCommand(dbconn);
             cmd.CommandText = "SELECT id,username FROM users ORDER BY username COLLATE NOCASE ASC";
             cmd.Prepare();
-            SQLiteDataReader rdr = cmd.ExecuteReader();
+             SQLiteDataReader rdr = cmd.ExecuteReader();
 
             Dictionary<string, string> users = new Dictionary<string, string>();
             List<Models.User> asd = new List<Models.User>();
@@ -133,7 +134,7 @@ namespace masodik.Controllers
         [Produces("application/json")]
         public IActionResult GetMessages(int id)
         {
-            SQLiteConnection dbconn = Globals.Dbconn;
+            SQLiteConnection dbconn = Elerhato.Dbconn;
             dbconn.Open();
             //System.Diagnostics.Debug.WriteLine(username);
 
@@ -171,7 +172,7 @@ namespace masodik.Controllers
                 var id=collection["id"];
                 System.Diagnostics.Debug.WriteLine(id);
 
-                SQLiteConnection dbconn = Globals.Dbconn;
+                SQLiteConnection dbconn = Elerhato.Dbconn;
                 dbconn.Open();
 
                 using var cmd = new SQLiteCommand(dbconn);

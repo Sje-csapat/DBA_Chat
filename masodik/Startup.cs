@@ -22,13 +22,13 @@ namespace masodik
         {
             Configuration = configuration;
             contentRoot = env.ContentRootPath;
-            Globals.TestDBConnection(contentRoot);
+            Elerhato.TestDBConnection(contentRoot);
             setUsersToOffline();
         }
 
         public void setUsersToOffline()
         {
-            SQLiteConnection dbconn = Globals.Dbconn;
+            SQLiteConnection dbconn = Elerhato.Dbconn;
             int conn_status = 0;
             if (dbconn != null && dbconn.State == ConnectionState.Closed)
             {

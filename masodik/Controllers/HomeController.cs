@@ -19,10 +19,8 @@ namespace masodik
         
         public ActionResult Index()
         {
-            
-            System.Diagnostics.Debug.WriteLine(!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")));
             //return View("Session");
-            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("is_logged_in")))
+            if ((HttpContext.Session.GetString("logged_in")!=null))
             {
                 //redirect or view
                 return RedirectToAction("Proba");
@@ -62,6 +60,8 @@ namespace masodik
                 return View();
             }
         }
+        [Route("Log")]
+        [HttpPost]
         public ActionResult Log(string username, string password)
         {
             
@@ -71,7 +71,7 @@ namespace masodik
                 password = password
             };
             
-            SQLiteConnection dbconn = Globals.Dbconn;
+            SQLiteConnection dbconn = Elerhato.Dbconn;
             dbconn.Open();
             //System.Diagnostics.Debug.WriteLine(username);
 
@@ -87,30 +87,32 @@ namespace masodik
                 Models.User user = new Models.User(rdr.GetInt32(0));
                 //System.Diagnostics.Debug.WriteLine($"{rdr.GetInt32(0)} {rdr.GetString(1)} {rdr.GetString(2)}");
                 string db_password = rdr.GetString(1);
-                bool pwd_verify = Globals.VerifyPassword(db_password, password);
+                bool pwd_verify = Elerhato.VerifyPassword(db_password, password);
                 if (pwd_verify) {
                     ViewBag.Message = passdata;
                     user.status = 1;
                     user.save();
 
-                    HttpContext.Session.SetString("is_logged_in", "1");
+                    HttpContext.Session.SetString("logged_in", "1");
                     HttpContext.Session.SetString("user_id", user.id.ToString());
-                    HttpContext.Session.SetString("user_username", user.username);
+                    HttpContext.Session.SetString("session_username", user.username);
                     isLoggedIn = 1;
                     
-                    Globals.Logger(user.id, "Login succes");
+                    Elerhato.Logger(user.id, "Login succes");
                 } else
                 {
                     //password mismatch
-                    Globals.Logger(user.id, "Failed login - password mismatch");
+                    Elerhato.Logger(user.id, "Failed login - password mismatch");
+                    ViewBag.Message = "Rossz jelszo vagy user";
                     isLoggedIn = 0;
                 }
             }
             dbconn.Close();
-            var name = HttpContext.Session.GetString("user_username");
-            ViewBag.Message = name;
+            var name = HttpContext.Session.GetString("session_username");
+            
             if (isLoggedIn == 1)
             {
+                ViewBag.Message = name;
                 return RedirectToAction("Index", "Chat");
             }
             else
@@ -119,13 +121,12 @@ namespace masodik
             }
             
         }
+
+        [Route("Reg")]
+        [HttpPost]
         public ActionResult Reg(string username, string password, string password2)
         {
-            string hashed = Globals.HashPassword(password, null, false);
-            
-
-            bool visszafejtve = Globals.VerifyPassword(hashed, "KIKasdI");
-            System.Diagnostics.Debug.WriteLine(visszafejtve);
+            string hashed = Elerhato.HashPassword(password, null, false);
 
             Register passdata = new Register
             {
@@ -133,37 +134,50 @@ namespace masodik
                 password = password,
                 password2 = password2
             };
-            if (password != password2) return View("Register");
+            if (password != password2)
+            {
+                ViewBag.Message = "Nem eggyezik a jelszo";
+                return View("Register");
+            }
 
-            HttpContext.Session.SetString("user_username",username);
-            SQLiteConnection dbconn = Globals.Dbconn;
-            dbconn.Open();
 
-            using var cmd = new SQLiteCommand(dbconn);
-            cmd.CommandText = "INSERT INTO users (username, password, created_at) values(@username, @password, @created_at)";
-            cmd.Parameters.AddWithValue("@username", username);
-            cmd.Parameters.AddWithValue("@password", hashed);
-            cmd.Parameters.AddWithValue("@created_at", (string)(DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds.ToString());
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            try
+            {
+                HttpContext.Session.SetString("session_username", username);
 
-            dbconn.Close();
+                SQLiteConnection dbconn = Elerhato.Dbconn;
+                dbconn.Open();
 
-            return RedirectToAction(nameof(Index));
+                using var cmd = new SQLiteCommand(dbconn);
+                cmd.CommandText = "INSERT INTO users (username, password, created_at) values(@username, @password, @created_at)";
+                cmd.Parameters.AddWithValue("@username", username);
+                cmd.Parameters.AddWithValue("@password", hashed);
+                cmd.Parameters.AddWithValue("@created_at", (string)(DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds.ToString());
+                cmd.Prepare();
+                cmd.ExecuteNonQuery();
+
+                dbconn.Close();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                ViewBag.Message = "Letezo felhasznalo";
+                return View("Register");
+            }
         }
 
-        [Route("logout")]
+        [Route("Logout")]
         [HttpGet]
         public ActionResult Logout()
         {
             var id = HttpContext.Session.GetString("user_id");
             Models.User tmp_user = new Models.User(Convert.ToInt32(id));
-            Globals.Logger(tmp_user.id, "User logged out");
+            Elerhato.Logger(tmp_user.id, "User logged out");
             tmp_user.status = 0;
             tmp_user.save();
-
             HttpContext.Session.Clear();
-            return RedirectToAction(nameof(Index));
+            return View("Login");
         }
     }
 }
